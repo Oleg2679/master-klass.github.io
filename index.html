@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Регистрация на мастер-класс</title>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 50px auto; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+    button { background: #4CAF50; color: white; border: none; }
+  </style>
+</head>
+<body>
+  <h2>Запишитесь на мастер-класс</h2>
+  <form method="post" action="https://script.google.com/macros/s/AKfycbwnUFpOWpVwCR-esSugIft1ZIgmI191VXHdV340GNnv9m02HY2spft87R-o8w2GTC2S0A/exec">
+    <input name="Имя" placeholder="Ваше имя" required>
+    <input name="Контакт" placeholder="Телефон или email" required>
+    <select name="Время" required>
+      <option value="">Выберите время</option>
+      <option value="9:00–10:00">9:00–10:00</option>
+      <option value="11:00–12:00">11:00–12:00</option>
+    </select>
+    <button type="submit">Записаться</button>
+  </form>
+</body>
+</html>
