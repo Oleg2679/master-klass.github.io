@@ -1,25 +1,289 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>Регистрация на мастер-класс</title>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Мастер-классы для молодёжи</title>
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 50px auto; }
-    input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
-    button { background: #4CAF50; color: white; border: none; }
+    :root {
+      --primary: #6a11cb;
+      --accent: #ff4d94;
+      --light: #f9f7fe;
+      --dark: #222;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+      padding: 20px;
+      color: var(--dark);
+    }
+    header {
+      text-align: center;
+      margin: 2rem 0;
+    }
+    h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+    .card h3 {
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+    .card .date-time {
+      font-weight: 600;
+      color: var(--accent);
+      margin: 8px 0;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+    .modal h2 {
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: #e03a7f;
+    }
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+    .success {
+      text-align: center;
+      color: #2e7d32;
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h2>Запишитесь на мастер-класс</h2>
-  <form method="post" action="https://script.google.com/macros/s/AKfycbwnUFpOWpVwCR-esSugIft1ZIgmI191VXHdV340GNnv9m02HY2spft87R-o8w2GTC2S0A/exec">
-    <input name="Имя" placeholder="Ваше имя" required>
-    <input name="Контакт" placeholder="Телефон или email" required>
-    <select name="Время" required>
-      <option value="">Выберите время</option>
-      <option value="9:00–10:00">9:00–10:00</option>
-      <option value="11:00–12:00">11:00–12:00</option>
-    </select>
-    <button type="submit">Записаться</button>
-  </form>
+
+  <header>
+    <h1>🔥 Мастер-классы для молодёжи</h1>
+    <p class="subtitle">Выбери то, что тебе интересно — и запишись всего за 2 клика!</p>
+  </header>
+
+  <div class="grid" id="masterclasses"></div>
+
+  <!-- Модальное окно регистрации -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modal-title">Запись на мастер-класс</h2>
+      <form id="registerForm">
+        <input type="hidden" id="mkId" />
+        <input type="hidden" id="mkDate" />
+        <input type="hidden" id="mkTime" />
+        <div class="form-group">
+          <label>Ф.И.О.</label>
+          <input type="text" id="fullName" required />
+        </div>
+        <div class="form-group">
+          <label>Телефон или email</label>
+          <input type="text" id="contact" required />
+        </div>
+        <button type="submit" class="btn">Записаться</button>
+      </form>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <script>
+    // === Данные мастер-классов (в идеале их можно получать через API,
+    // но для GitHub Pages без сервера — вшиты прямо в код) ===
+    const masterclasses = [
+      {
+        id: 1,
+        date: "2025-12-10",
+        time: "18:00 - 20:00",
+        title: "Создай свой первый сайт за 2 часа",
+        desc: "Научитесь основам HTML и CSS. Сделайте свою первую визитку и опубликуйте её бесплатно на GitHub Pages."
+      },
+      {
+        id: 2,
+        date: "2025-12-12",
+        time: "17:00 - 19:00",
+        title: "Автоматизируй свою жизнь: боты и скрипты",
+        desc: "Создайте Telegram-бота, который будет присылать вам напоминания или курс валют. Без кода и с ним."
+      },
+      {
+        id: 3,
+        date: "2025-12-15",
+        time: "16:00 - 18:00",
+        title: "Игра на Python: сделай свою первую игру",
+        desc: "Освойте основы Python, создав простую 2D-игру. Управляйте персонажем, собирайте очки и побеждайте метеориты!"
+      },
+      {
+        id: 4,
+        date: "2025-12-18",
+        time: "19:00 - 21:00",
+        title: "Искусственный интеллект для всех",
+        desc: "Познакомьтесь с ИИ без сложной математики. Создайте чат-бота, который отвечает на ваши вопросы."
+      },
+      {
+        id: 5,
+        date: "2025-12-20",
+        time: "15:00 - 17:00",
+        title: "Мобильное приложение без Android Studio",
+        desc: "Создайте своё первое мобильное приложение с помощью no-code платформы Glide или Thunkable."
+      }
+    ];
+
+    // === Вставьте СЮДА ваш Google Apps Script URL ===
+    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwGxG66RYaDJvW0a0oXHHdiFJWynMlzAlTvRvtNL9A9QMzbdBZ4iSFsi8im6iYH-ajX/exec";
+
+    // === Отображаем карточки ===
+    const container = document.getElementById("masterclasses");
+    masterclasses.forEach(mk => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${mk.title}</h3>
+        <div class="date-time">${mk.date} · ${mk.time}</div>
+        <p>${mk.desc}</p>
+      `;
+      card.onclick = () => openModal(mk);
+      container.appendChild(card);
+    });
+
+    // === Открытие модального окна ===
+    function openModal(mk) {
+      document.getElementById("modal-title").textContent = `Запись: ${mk.title}`;
+      document.getElementById("mkId").value = mk.id;
+      document.getElementById("mkDate").value = mk.date;
+      document.getElementById("mkTime").value = mk.time;
+      document.getElementById("result").textContent = "";
+      document.getElementById("registerForm").reset();
+      document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    // === Отправка данных ===
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mkId = document.getElementById("mkId").value;
+      const date = document.getElementById("mkDate").value;
+      const time = document.getElementById("mkTime").value;
+      const fullName = document.getElementById("fullName").value;
+      const contact = document.getElementById("contact").value;
+
+      const payload = {
+        action: "register",
+        masterclassId: mkId,
+        date: date,
+        fullName: fullName,
+        contact: contact,
+        time: time
+      };
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const resultDiv = document.getElementById("result");
+        if (response.ok) {
+          resultDiv.innerHTML = '<div class="success">✅ Успешно! Мы свяжемся с вами.</div>';
+          setTimeout(closeModal, 2000);
+        } else {
+          resultDiv.innerHTML = '<div class="success" style="color:red;">❌ Ошибка отправки. Попробуйте позже.</div>';
+        }
+      } catch (err) {
+        document.getElementById("result").innerHTML = '<div style="color:red;">❌ Нет связи с сервером.</div>';
+      }
+    });
+
+    // Закрытие по клику вне окна
+    window.onclick = (e) => {
+      if (e.target === document.getElementById("modal")) closeModal();
+    };
+  </script>
 </body>
 </html>
